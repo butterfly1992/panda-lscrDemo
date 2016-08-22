@@ -1,0 +1,111 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"  
+   "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!-- namespace和定义的Mapper接口对应，并实现其中的方法 -->
+<mapper namespace="com.lscr.mapper.OperateMapper">
+	<select id="getIndexs" parameterType="param" resultType="req">  
+         <![CDATA[
+ SELECT  IFNULL(setupindex,'0') setupindex ,IFNULL(clickindex,'0') clickindex, TIME FROM nlscr_ori_req WHERE imei=#{imei} AND imsi=#{imsi}  ORDER BY TIME DESC
+     ]]>
+	</select>
+	<insert id="insertIndex" parameterType="req" useGeneratedKeys="true">
+         <![CDATA[
+         INSERT INTO nlscr_ori_req(imei,imsi,apkindex,ENTINDEX,clickindex,downindex,TIME,setupindex	) VALUES (#{imei},#{imsi},#{apkindex},#{entityindex},#{clickindex},#{downindex},#{time},#{setupindex});
+      ]]>
+	</insert>
+
+	
+	<update id="updateNoovertimeIndex" parameterType="param" >
+		UPDATE nlscr_ori_req
+		<set>
+		<if test="oper==4">setupindex=CONCAT_WS(',',setupindex,#{advindex})</if>
+		<if test="oper==5">clickindex=CONCAT_WS(',',clickindex,#{advindex})</if>
+		</set>
+		WHERE imei=#{imei} and imsi=#{imsi} and time=#{time}
+	</update>
+
+	<!--插入start 操作 -->
+	<insert id="insertlookOper" parameterType="param"
+		useGeneratedKeys="true">
+         <![CDATA[
+INSERT INTO nlscr_ori_aoper (appid,softid,look,click,download,setup,TIME,gysdkv) VALUES (#{appid},#{softid},1,0,0,0,#{time},#{gysdkv});      ]]>
+	</insert>
+	<insert id="insertclickOper" parameterType="param"
+		useGeneratedKeys="true">
+         <![CDATA[
+INSERT INTO nlscr_ori_aoper (appid,softid,look,click,download,setup,TIME,gysdkv) VALUES (#{appid},#{softid},1,1,0,0,#{time},#{gysdkv});      ]]>
+	</insert>
+	<insert id="insertdownOper" parameterType="param"
+		useGeneratedKeys="true">
+         <![CDATA[
+INSERT INTO nlscr_ori_aoper (appid,softid,look,click,download,setup,TIME,gysdkv) VALUES (#{appid},#{softid},0,0,1,0,#{time},#{gysdkv});      ]]>
+	</insert>
+	<insert id="insertsetupOper" parameterType="param"
+		useGeneratedKeys="true">
+         <![CDATA[
+INSERT INTO nlscr_ori_aoper (appid,softid,look,click,download,setup,TIME,gysdkv) VALUES (#{appid},#{softid},0,0,0,1,#{time},#{gysdkv});      ]]>
+	</insert>
+	<insert id="insertentlookOper" parameterType="param"
+		useGeneratedKeys="true">
+         <![CDATA[
+INSERT INTO nlscr_ori_eoper (appid,softid,look,detial,TIME,gysdkv) VALUES (#{appid},#{softid},1,0,#{time},#{gysdkv}) ]]>
+	</insert>
+<insert id="insertentclickOper" parameterType="param"
+		useGeneratedKeys="true">
+         <![CDATA[
+INSERT INTO nlscr_ori_eoper (appid,softid,look,detial,TIME,gysdkv) VALUES (#{appid},#{softid},0,1,#{time},#{gysdkv}) ]]>
+	</insert>
+
+	<!--插入end 操作 -->
+
+	<!--更新 start 操作 -->
+	<update id="updatelookOper" parameterType="param">
+         <![CDATA[
+UPDATE nlscr_ori_aoper SET look=look+1 WHERE appid=#{appid} and softid=#{softid} and time=#{time} and gysdkv=#{gysdkv}
+   ]]>
+	</update>
+	<update id="updateclickOper" parameterType="param">
+         <![CDATA[
+UPDATE nlscr_ori_aoper SET click=click+1 WHERE appid=#{appid} and softid=#{softid} and time=#{time} and gysdkv=#{gysdkv}
+   ]]>
+	</update>
+	<update id="updatedownOper" parameterType="param">
+         <![CDATA[
+UPDATE nlscr_ori_aoper SET download=download+1 WHERE appid=#{appid} and softid=#{softid} and time=#{time} and gysdkv=#{gysdkv}
+   ]]>
+	</update>
+	<update id="updatesetupOper" parameterType="param">
+         <![CDATA[
+UPDATE nlscr_ori_aoper SET setup=setup+1 WHERE appid=#{appid} and softid=#{softid} and time=#{time} and gysdkv=#{gysdkv}
+   ]]>
+	</update>
+	<update id="updateentlookOper" parameterType="param">
+         <![CDATA[
+UPDATE nlscr_ori_eoper SET look=look+1 WHERE appid=#{appid} and softid=#{softid} and time=#{time} and gysdkv=#{gysdkv}
+   ]]>
+	</update>
+	<update id="updateentdetialOper" parameterType="param">
+         <![CDATA[
+UPDATE nlscr_ori_eoper SET detial=detial+1 WHERE appid=#{appid} and softid=#{softid} and time=#{time} and gysdkv=#{gysdkv}
+   ]]>
+	</update>
+	<!--更新 end 操作 -->
+	<!-- 用户展示量 -->
+	<insert id="insertuserlook" parameterType="param"
+		useGeneratedKeys="true">
+         <![CDATA[
+INSERT INTO nlscr_ori_userlook (imei,imsi,lookcount,TIME) VALUES (#{imei},#{imsi},1,#{time})   ]]>
+	</insert>
+	<update id="updateuserlook" parameterType="param">
+         <![CDATA[
+UPDATE nlscr_ori_userlook SET lookcount=lookcount+1 WHERE TIME=#{time} and imei=#{imei} and imsi=#{imsi}
+   ]]>
+	</update>
+
+	<select id="getReqsoftId" parameterType="java.lang.String"
+		resultType="java.lang.String">  
+         <![CDATA[
+ SELECT id FROM zy_soft WHERE wareindex=#{advindex}
+     ]]>
+	</select>
+</mapper>

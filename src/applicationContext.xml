@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:p="http://www.springframework.org/schema/p"
+	xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:util="http://www.springframework.org/schema/util" xmlns:mvc="http://www.springframework.org/schema/mvc"
+	xsi:schemaLocation="http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util-3.1.xsd
+    http://www.springframework.org/schema/beans  http://www.springframework.org/schema/beans/spring-beans-3.1.xsd
+    http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-3.1.xsd
+    http://www.springframework.org/schema/mvc http://www.springframework.org/schema/mvc/spring-mvc-3.1.xsd">
+	<!--注解说明 -->
+	<bean
+		class="org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter"
+		p:ignoreDefaultModelOnRedirect="true">
+		<property name="messageConverters">
+			<list>
+				<bean
+					class="org.springframework.http.converter.json.MappingJacksonHttpMessageConverter"
+					p:supportedMediaTypes="*/*" />
+			</list>
+		</property>
+	</bean>
+	<mvc:annotation-driven />
+	<!-- 把标记了@Controller注解的类转换为bean -->
+	<context:component-scan base-package="com.lscr" />
+		<mvc:interceptors>
+		<mvc:interceptor>
+			<mvc:mapping path="/psorder" />
+			<bean class="user.agent.interceptor.ReqHandlerInterceptor"></bean>
+		</mvc:interceptor>
+		<!-- <mvc:interceptor>
+			<mvc:mapping path="/calcrecod.action" />
+			<bean class="user.agent.interceptor.OperHandlerInterceptor"></bean>
+		</mvc:interceptor> -->
+	</mvc:interceptors>
+	<!-- 添加注解驱动 -->
+	<bean
+		class="org.springframework.web.servlet.mvc.annotation.DefaultAnnotationHandlerMapping"></bean>
+	<!--创建jdbc数据源 -->
+	<bean id="dataSource" class="com.mchange.v2.c3p0.ComboPooledDataSource">
+		<property name="driverClass" value="com.mysql.jdbc.Driver" />
+		<!-- <property name="jdbcUrl" value="jdbc:mysql://192.168.0.18:3306/pandaDB" 
+			/> <property name="user" value="zy" /> <property name="password" value="zy" 
+			/> -->
+		<property name="jdbcUrl" value="jdbc:mysql://127.0.0.1:3306/pandaDB" />
+		<property name="user" value="pandaAdminMySql" />
+		<property name="password" value="pandaAdmin*#123MySql" />
+	<!-- 	<property name="jdbcUrl" value="jdbc:mysql://192.168.0.1:3306/pandaDB" />
+		<property name="user" value="pandaConnectUser" />
+		<property name="password" value="panda*#Connect@&amp;User2014" /> -->
+		<property name="acquireIncrement" value="5"></property>  <!-- 当连接池中的连接用完时，C3P0一次性创建新连接的数目2 -->
+		<property name="initialPoolSize" value="5"></property>  <!-- 初始化时创建的连接数，必须在minPoolSize和maxPoolSize之间 -->
+		<property name="minPoolSize" value="10"></property>
+		<property name="maxPoolSize" value="40"></property>
+		<!-- 最大空闲时间，超过空闲时间的连接将被丢弃 [需要注意：mysql默认的连接时长为8小时(28800）【可在my.ini中添加 wait_timeout=30(单位秒)设置连接超时】,这里设置c3p0的超时必须<28800] -->
+		<property name="maxIdleTime" value="300"></property>
+		<property name="idleConnectionTestPeriod" value="60"></property> <!-- 每60秒检查连接池中的空闲连接 -->
+		<property name="maxStatements" value="20"></property>  <!-- jdbc的标准参数 用以控制数据源内加载的PreparedStatement数量，但由于预缓存的Statement属 于单个Connection而不是整个连接 -->
+		<property name="testConnectionOnCheckin" value="false" />
+		<property name="testConnectionOnCheckout" value="true" />
+		<property name="preferredTestQuery" value="SELECT 1" />
+	</bean>
+	<!-- (事务管理)transaction manager, use JtaTransactionManager for global tx -->
+	<bean id="transactionManager"
+		class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+		<property name="dataSource" ref="dataSource" />
+	</bean>
+	<bean id="sqlSessionFactory" class="org.mybatis.spring.SqlSessionFactoryBean">
+		<property name="dataSource" ref="dataSource" />
+		<property name="configLocation" value="classpath:mybatis.xml" />
+		<!-- mapper和resultmap配置路径 -->
+		<property name="mapperLocations">
+			<list>
+				<value> classpath:com/lscr/mapper/*.xml</value>
+			</list>
+		</property>
+	</bean>
+	<!-- Mapper接口所在包名，Spring会自动查找其下的Mapper -->
+	<bean id="mapperConfigurer" class="org.mybatis.spring.mapper.MapperScannerConfigurer"><!-- 扫描指定包以获取映射器 -->
+		<property name="basePackage" value="com.lscr.mapper" />
+	</bean>
+	<bean id="viewResolver"
+		class="org.springframework.web.servlet.view.InternalResourceViewResolver">
+		<property name="prefix" value="/jsp/" />
+		<property name="suffix" value=".jsp" />
+	</bean>
+</beans>

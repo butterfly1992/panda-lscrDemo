@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE configuration PUBLIC "-//mybatis.org//DTD Config 3.0//EN" "http://mybatis.org/dtd/mybatis-3-config.dtd">
+<configuration>
+	<!-- 别名 -->
+	<typeAliases>
+		<typeAlias type="com.lscr.entity.Param" alias="Param" />
+		<typeAlias type="com.lscr.entity.App" alias="App" />
+		<typeAlias type="com.lscr.entity.Soft" alias="Soft" />
+		<typeAlias type="com.lscr.entity.Entity" alias="Entity" />
+		<typeAlias type="com.lscr.entity.Req" alias="Req" />
+		<typeAlias type="com.lscr.entity.YQadv" alias="YQadv" />
+	</typeAliases>
+</configuration>

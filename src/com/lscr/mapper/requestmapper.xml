@@ -1,0 +1,146 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"  
+   "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!-- namespace和定义的Mapper接口对应，并实现其中的方法 -->
+<mapper namespace="com.lscr.mapper.RequestMapper">
+
+
+	<resultMap type="Soft" id="SoftResult">
+		<id property="id" column="id" />
+		<result property="name" column="NAME" />
+		<result property="apkurl" column="apk" />
+		<result property="lsindex" column="lsindex" />
+		<result property="pck" column="pck" />
+		<result property="imgurl" column="imgurl" />
+		<result property="icon" column="icon" />
+		<result property="lscode" column="lscode" />
+		<result property="category" column="category" />
+		<result property="softtype" column="softtype" />
+		<result property="province" column="province" />
+	</resultMap>
+	<resultMap type="Entity" id="EntResult">
+		<id property="id" column="id" />
+		<result property="name" column="NAME" />
+		<result property="apkurl" column="apk" />
+		<result property="icon" column="icon" />
+		<result property="imgurl" column="limgurl" />
+		<result property="linkurl" column="LINKURL" />
+		<result property="imgurl" column="imgurl" />
+		<result property="lsindex" column="lsindex" />
+		<result property="priority" column="priority" />
+	</resultMap>
+	<!-- id和mapper接口中的方法名对应，resultType使用mybatis.xml中的别名 -->
+	<select id="lscrswitch" parameterType="param" resultType="app">  
+         <![CDATA[
+             SELECT lscr_in_status,lscr_out_status FROM zy_app WHERE id=#{appid}
+         ]]>
+	</select>
+
+	<select id="getSoftAdv" parameterType="param" resultType="soft">
+		SELECT id,NAME,apk apkurl,wareindex lsindex,pck,screenimg
+		imgurl,icon,lscode,category,
+		<if test="operation==0">0 </if>
+		<if test="operation==1">YDputtype </if>
+		<if test="operation==2">LTputtype </if>
+		<if test="operation==3">DXputtype </if>
+		softtype,
+		<if test="operation==0">0 </if>
+		<if test="operation==1">IFNULL(YDprovince,'') </if>
+		<if test="operation==2">IFNULL(LTprovince,'') </if>
+		<if test="operation==3">IFNULL(DXprovince,'') </if>
+		province
+		FROM zy_soft
+		WHERE lsSTATUS=2 and lscode>#{lscode} and
+		company=0
+		<if test="operation!=0"> and
+			(FIND_IN_SET(#{operation},operation) )
+		</if>
+		order by lscode
+		limit 0,1
+	</select>
+
+
+	<select id="getSoftAdvMore" parameterType="param" resultMap="SoftResult">
+		SELECT id,NAME,apk apkurl,wareindex lsindex,pck,screenimg
+		imgurl,icon,lscode,category,
+		<if test="operation==0">0 </if>
+		<if test="operation==1">YDputtype </if>
+		<if test="operation==2">LTputtype </if>
+		<if test="operation==3">DXputtype </if>
+		softtype,
+		<if test="operation==0">0 </if>
+		<if test="operation==1">IFNULL(YDprovince,'') </if>
+		<if test="operation==2">IFNULL(LTprovince,'') </if>
+		<if test="operation==3">IFNULL(DXprovince,'') </if>
+		province FROM zy_soft
+		WHERE lsSTATUS=2 and lscode>#{lscode} and
+		company=0
+		<if test="operation!=0"> and
+			(FIND_IN_SET(#{operation},operation) )
+		</if>
+		order by lscode
+		limit 0,#{limit}
+	</select>
+
+	<!-- 2016-01-14更新，无卡用户请求返回上线广告数据，之前是不返回广告 -->
+	<select id="getSoftAreaAdvMore" parameterType="param" resultMap="SoftResult">
+		SELECT id,NAME,apk apkurl,wareindex lsindex,pck,screenimg
+		imgurl,icon,lscode,category FROM zy_soft
+		WHERE lsSTATUS=2 and
+		lscode>#{lscode} and company=0
+		<if test="operation!=0">
+			and
+			(FIND_IN_SET(#{operation},operation)) and (
+			<if test="operation==1">YDputtype </if>
+			<if test="operation==2">LTputtype </if>
+			<if test="operation==3">DXputtype </if>
+			=0
+			OR (!LOCATE(#{area},
+			<if test="operation==1">YDprovince </if>
+			<if test="operation==2">LTprovince </if>
+			<if test="operation==3">DXprovince </if>
+			)))
+		</if>
+		order by lscode limit 0,#{limit}
+	</select>
+
+	<select id="getblacklistMore" parameterType="param" resultMap="SoftResult">  
+         <![CDATA[
+                SELECT id,NAME,apk apkurl,wareindex lsindex,pck,screenimg imgurl,icon,lscode,category,0 softtype,0 province FROM zy_soft 
+   WHERE   lsSTATUS=2 and  lscode>0 and company=1  order by lscode  limit 0,2
+      ]]>
+	</select>
+
+	<select id="getEntityAdv" parameterType="param" resultType="entity">  
+         <![CDATA[
+        SELECT id,NAME,limgurl imgurl,LINKURL,advindex lsindex,priority,LOGO icon FROM zy_adv 
+   WHERE   priority>#{priority}  AND STATUS=2  ORDER BY priority LIMIT 0,1
+      ]]>
+	</select>
+
+	<select id="getEntityAdvmore" parameterType="param" resultMap="EntResult">  
+         <![CDATA[
+        SELECT id,NAME,limgurl,LINKURL,advindex lsindex,priority,LOGO  icon FROM zy_adv 
+   WHERE   priority>#{priority}  AND STATUS=2  ORDER BY priority LIMIT 0,2
+      ]]>
+	</select>
+	<select id="lscrcount" parameterType="param" resultType="app">  
+         <![CDATA[
+SELECT IF(lscr_out_count=0,1000,lscr_out_count) lscr_out_count,IF(lscr_in_count=0,1000,lscr_in_count) lscr_in_count  FROM zy_app WHERE id=#{appid}
+     ]]>
+	</select>
+	<delete id="delete" parameterType="param">
+		delete from nlscr_ori_req
+		where imei=#{imei} and imsi=#{imsi}
+	</delete>
+
+
+	<!-- 移趣专门推送广告 -->
+	<select id="getYqSoftAdv" parameterType="param" resultType="YQadv">  
+         <![CDATA[
+                SELECT id,NAME,apk apkurl,wareindex lsindex,pck,screenimg imgurl,icon,lscode,category FROM zy_soft 
+   WHERE company=1 and   lsSTATUS=2 and  lscode>#{lscode}    order by lscode  limit 0,1 
+      ]]>
+	</select>
+
+</mapper>
